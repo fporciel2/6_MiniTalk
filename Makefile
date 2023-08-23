@@ -6,7 +6,7 @@
 #    By: fporciel <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/22 19:16:39 by fporciel          #+#    #+#              #
-#    Updated: 2023/08/22 20:32:50 by fporciel         ###   ########.fr        #
+#    Updated: 2023/08/23 12:00:06 by fporciel         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # 
@@ -33,8 +33,8 @@
 .PHONY: all clean fclean re norm_check leaks_check_server leaks_check_client \
 	ft_printf_download clean_ft_printf
 .DEFAULT_GOAL := $(NAME)
-MT_SERVER := mt_server
-MT_CLIENT := mt_client
+MT_SERVER := server
+MT_CLIENT := client
 NAME := $(MT_SERVER) $(MT_CLIENT)
 MTDIRECTORY := $(shell pwd)
 FTPRINTFDIRECTORY := $(MTDIRECTORY)/2_ft_printf
