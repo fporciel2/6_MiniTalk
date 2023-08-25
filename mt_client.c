@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 17:39:21 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/23 18:22:51 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/25 09:03:37 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -36,6 +36,7 @@
 static int	mt_send_signals(char *message, int pid)
 {
 	int	shift;
+	int	check;
 
 	shift = -1;
 	while (*message)
@@ -43,14 +44,11 @@ static int	mt_send_signals(char *message, int pid)
 		while (++shift < 8)
 		{
 			if (*message & 0x80 >> shift)
-				kill(pid, SIGUSR2);
+				check = kill(pid, SIGUSR2);
 			else
-				kill(pid, SIGUSR1);
-			if (usleep(2) == -1)
-			{
-				write(1, "\nSomething went wrong during transmission\n", 42);
-				exit(EXIT_FAILURE);
-			}
+				check = kill(pid, SIGUSR1);
+			if ((check == -1) || (usleep(3) == -1))
+				return (-1);
 		}
 		message++;
 	}
@@ -61,12 +59,9 @@ int	main(int argc, char **argv)
 	int	pid;
 
 	if (argc != 2)
-	{
-		write(1, "\nClient: invalid arguments.\n", 27);
-		write(1, "\t Correct format: [./client 'SERVER_PID' MESSAGE]\n", 50);
-		exit(EXIT_FAILURE);
-	}
+		return (mt_argument_error());
 	pid = ft_atoi(argv[1]);
-	mt_send_signals(argv[2], pid);
+	if (mt_send_signals(argv[2], pid) == -1)
+		return (mt_error_exit());
 	return (0);
 }

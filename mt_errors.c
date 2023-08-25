@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minitalk.h                                         :+:      :+:    :+:   */
+/*   mt_errors.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: fporciel <fporciel@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/08/23 17:34:59 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/25 09:01:29 by fporciel         ###   ########.fr       */
+/*   Created: 2023/08/25 08:52:51 by fporciel          #+#    #+#             */
+/*   Updated: 2023/08/25 08:58:28 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -31,16 +31,18 @@
 *- fporciel@student.42roma.it
 */
 
-#ifndef MINITALK_H
-# define MINITALK_H
-# include <signal.h>
-# include <stdlib.h>
-# include <unistd.h>
-# include <sys/types.h>
-# include "./2_ft_printf/libftprintf.h"
-# include "./2_ft_printf/libft/libft.h"
+int	mt_argument_error(void)
+{
+	write(1, "\nClient: invalid arguments.\n", 27);
+	write(1, "\t Correct format: [./client 'SERVER_PID' MESSAGE]\n", 50);
+	exit(EXIT_FAILURE);
+	return (-1);
+}
 
-int	mt_error_exit(void);
-int	mt_argument_error(void);
 
-#endif
+int  mt_error_exit(void)
+{
+	write(1, "\nSomething went wrong during transmission\n", 42);
+	exit(EXIT_FAILURE);
+	return (-1);
+}

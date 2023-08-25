@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 17:33:03 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/23 18:05:11 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/25 08:51:57 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -51,8 +51,10 @@ int	main(void)
 
 	pid = getpid();
 	ft_printf("\nPID: %d\n", pid);
-	signal(SIGUSR1, mt_sigusr1);
-	signal(SIGUSR2, mt_sigusr2);
+	if (signal(SIGUSR1, mt_sigusr1) == SIG_ERR)
+		return (mt_error_exit());
+	if (signal(SIGUSR2, mt_sigusr2) == SIG_ERR)
+		return (mt_error_exit());
 	while (1)
 		pause();
 }

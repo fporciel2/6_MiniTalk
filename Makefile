@@ -6,7 +6,7 @@
 #    By: fporciel <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/22 19:16:39 by fporciel          #+#    #+#              #
-#    Updated: 2023/08/23 12:00:06 by fporciel         ###   ########.fr        #
+#    Updated: 2023/08/25 09:19:11 by fporciel         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # 
@@ -47,6 +47,8 @@ LIBRARIES := $(LIBFTPRINTF) $(LIBFT)
 LIBRARIES_DIRECTORIES := $(FTLIBRARY) $(FTPRINTFDIRCETORY)
 SOURCE_FILES_SERVER := $(wildcard mt_*_server.c)
 SOURCE_FILES_CLIENT := $(wildcard mt_*_client.c)
+SOURCE_FILES_BOTH := $(SOURCE_FILES_SERVER) $(SOURCE_FILES_CLIENT)
+SOURCE_FILES_SHARED := $(filter-out $(SOURCE_FILES_BOTH), $(wildcard mt_*.c))
 CC := gcc
 COMPILER_FLAGS := -Wall -Wextra -Werror -g -c
 HEADERS_FLAGS := $(addprefix -I, $(INCLUDES))
@@ -61,13 +63,15 @@ $(MT_SERVER): $(LIBRARIES)
 	if [ -e $(MT_SERVER) ]; \
 		then echo "mt_server already linked"; \
 		else $(CC) $(COMPILER_FLAGS) $(HEADERS_FLAGS) $(SOURCE_FILES_SERVER) \
-		$(LIBRARIES_FLAGS) $(LINKER_FLAGS) -o $(MT_SERVER); fi
+		$(SOURCE_FILES_SHARED) $(LIBRARIES_FLAGS) \
+		$(LINKER_FLAGS) -o $(MT_SERVER); fi
 
 $(MT_CLIENT): $(LIBRARIES)
 	if [ -e $(MT_CLIENT) ]; \
 		then echo "mt_client already linked"; \
 		else $(CC) $(COMPILER_FLAGS) $(HEADERS_FLAGS) $(SOURCE_FILES_CLIENT) \
-		$(LIBRARIES_FLAGS) $(LINKER_FLAGS) -o $(MT_CLIENT); fi
+		$(SOURCE_FILES_SHARED) $(LIBRARIES_FLAGS) \
+		$(LINKER_FLAGS) -o $(MT_CLIENT); fi
 
 $(LIBRARIES): $(LIBFT) $(LIBFTPRINTF)
 
