@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 17:34:59 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/25 09:01:29 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/25 16:32:26 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -37,8 +37,8 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <sys/types.h>
-# include "./2_ft_printf/libftprintf.h"
-# include "./2_ft_printf/libft/libft.h"
+# include "./printf/ft_printf.h"
+# include "./printf/libft/libft.h"
 
 int	mt_error_exit(void);
 int	mt_argument_error(void);

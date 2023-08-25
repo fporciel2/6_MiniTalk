@@ -6,7 +6,7 @@
 #    By: fporciel <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/22 19:16:39 by fporciel          #+#    #+#              #
-#    Updated: 2023/08/25 09:19:11 by fporciel         ###   ########.fr        #
+#    Updated: 2023/08/25 16:33:28 by fporciel         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # 
@@ -30,88 +30,55 @@
 # You can contact the author at: 
 #- fporciel@student.42roma.it
 
-.PHONY: all clean fclean re norm_check leaks_check_server leaks_check_client \
-	ft_printf_download clean_ft_printf
+.PHONY: all clean fclean re norm_check leaks_check_server leaks_check_client
 .DEFAULT_GOAL := $(NAME)
+NAME := client
 MT_SERVER := server
-MT_CLIENT := client
-NAME := $(MT_SERVER) $(MT_CLIENT)
-MTDIRECTORY := $(shell pwd)
-FTPRINTFDIRECTORY := $(MTDIRECTORY)/2_ft_printf
-FTDIRECTORY := $(FTPRINTFDIRECTORY)/libft
-HEADER := minitalk.h
-INCLUDES := /usr/include $(FTPRINTFDIRECTORY) $(FTDIRECTORY) $(MTDIRECTORY)
-LIBFTPRINTF := $(FTPRINTFDIRECTORY)/libftprintf.a
-LIBFT := $(FTDIRECTORY)/libft.a
-LIBRARIES := $(LIBFTPRINTF) $(LIBFT)
-LIBRARIES_DIRECTORIES := $(FTLIBRARY) $(FTPRINTFDIRCETORY)
-SOURCE_FILES_SERVER := $(wildcard mt_*_server.c)
-SOURCE_FILES_CLIENT := $(wildcard mt_*_client.c)
-SOURCE_FILES_BOTH := $(SOURCE_FILES_SERVER) $(SOURCE_FILES_CLIENT)
-SOURCE_FILES_SHARED := $(filter-out $(SOURCE_FILES_BOTH), $(wildcard mt_*.c))
+MT_ERRORS := mt_errors.o
+CLIENT_SOURCE := mt_client.c
+SERVER_SOURCE := mt_server.c
+ERRORS_SOURCE := mt_errors.c
+THISDIR := $(shell pwd)
+PRINTF_DIR := $(THISDIR)/printf
+PRINTF_LIB := $(PRINTF_DIR)/libftprintf.a
 CC := gcc
-COMPILER_FLAGS := -Wall -Wextra -Werror -g -c
-HEADERS_FLAGS := $(addprefix -I, $(INCLUDES))
-LIBRARIES_FLAGS := $(addprefix -L, $(LIBRARIES_DIRECTORIES))
-LINKER_FLAGS := -lft -lftprintf
+CFLAGS := -Wall -Wextra -Werror -g
 
-$(NAME): $(MT_SERVER) $(MT_CLIENT)
+$(NAME): $(MT_SERVER)
+	$(CC) $(CFLAGS) mt_client.c mt_errors.c -o client -I$(THISDIR) \
+		-I$(PRINTF_DIR) -I$(PRINTF_DIR)/libft -I/usr/include \
+		-L$(PRINTF_DIR) -L$(PRINTF_DIR)/libft -lftprintf -lft
 
 all: $(NAME)
 
-$(MT_SERVER): $(LIBRARIES)
-	if [ -e $(MT_SERVER) ]; \
-		then echo "mt_server already linked"; \
-		else $(CC) $(COMPILER_FLAGS) $(HEADERS_FLAGS) $(SOURCE_FILES_SERVER) \
-		$(SOURCE_FILES_SHARED) $(LIBRARIES_FLAGS) \
-		$(LINKER_FLAGS) -o $(MT_SERVER); fi
+$(MT_SERVER): $(PRINTF_LIB)
+	$(CC) $(CFLAGS) mt_server.c mt_errors.c -o server -I$(THISDIR) \
+		-I$(PRINTF_DIR) -I$(PRINTF_DIR)/libft -I/usr/include \
+		-L$(PRINTF_DIR) -L$(PRINTF_DIR)/libft -lftprintf -lft
 
-$(MT_CLIENT): $(LIBRARIES)
-	if [ -e $(MT_CLIENT) ]; \
-		then echo "mt_client already linked"; \
-		else $(CC) $(COMPILER_FLAGS) $(HEADERS_FLAGS) $(SOURCE_FILES_CLIENT) \
-		$(SOURCE_FILES_SHARED) $(LIBRARIES_FLAGS) \
-		$(LINKER_FLAGS) -o $(MT_CLIENT); fi
-
-$(LIBRARIES): $(LIBFT) $(LIBFTPRINTF)
-
-$(LIBFT): ft_printf_download
-	if [ -e $(LIBFT) ]; \
-		then echo "libft detected"; \
-		else cd $(FTDIRECTORY) && make && cd .. && cd ..; fi
-
-$(LIBFTPRINTF): ft_printf_download
-	if [ -e $(LIBFTPRINTF) ]; \
-		then echo "libftprintf detected"; \
-		else cd $(FTPRINTFDIRECTORY) && make && cd ..; fi
-
-ft_printf_download:
-	if [ -e $(FTPRINTFDIRECTORY) ]; \
-		then echo "Libraries' directories detected"; \
-		else git clone git@github.com:fporciel2/2_ft_printf.git; fi
+$(PRINTF_LIB):
+	cd printf && make && cd ..
 
 clean:
-	rm -f *.o $(FTPRINTFDIRECTORY)/*.o $(FTDIRECTORY)/*.o
-	rm -f *.h.gch $(FTPRINTFDIRECTORY)/*.h.gch $(FTDIRECTORY)/*.h.gch
+	rm -f *.o
+	cd $(PRINTF_DIR)/libft && make clean && cd .. && make clean && cd ..
 
 fclean: clean
-	rm -f $(NAME) $(LIBFT) $(LIBFTPRINTF)
+	rm -f client
+	rm -f server
+	cd $(PRINTF_DIR)/libft && make clean && cd .. && make clean && cd ..
 
-re: fclean all
+re: clean fclean all
 
-clean_ft_printf:
-	rm -rfd $(FTPRINTFDIRECTORY)
+norm_check:
+	cd $(PRINTF_DIR)/libft && norminette && cd .. && norminette && cd .. \
+		&& norminette
 
 leaks_check_server:
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s \
-		-v ./mt_server
+	valgrind --leak-check=full --show-leak-kind=all --track-origins=yes -s \
+		-v ./server
 
 leaks_check_client:
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s \
-		-v ./mt_client
-
-norm_check:
-	norminette $(SOURCE_FILES_SERVER) $(SOURCE_FILES_CLIENT) $(HEADER) \
-		$(FTDIRECTORY)/*.c $(FTDIRECTORY)/*.h $(FTPRINTFDIRECTORY)/*.c \
-		$(FTPRINTFDIRECTORY)*.h
+		-v ./client
 

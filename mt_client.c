@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 17:39:21 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/25 09:03:37 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/25 16:37:46 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -52,6 +52,7 @@ static int	mt_send_signals(char *message, int pid)
 		}
 		message++;
 	}
+	return (0);
 }
 
 int	main(int argc, char **argv)

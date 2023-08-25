@@ -6,7 +6,7 @@
 /*   By: fporciel <fporciel@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/25 08:52:51 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/25 08:58:28 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/25 16:37:19 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -30,6 +30,8 @@
 * You can contact the author at: 
 *- fporciel@student.42roma.it
 */
+
+#include "minitalk.h"
 
 int	mt_argument_error(void)
 {
