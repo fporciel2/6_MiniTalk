@@ -6,7 +6,7 @@
 /*   By: fporciel <fporciel@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/25 08:52:51 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/25 16:37:19 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/25 20:12:11 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -32,6 +32,24 @@
 */
 
 #include "minitalk.h"
+
+int	mt_error_client(char *str)
+{
+	if (str)
+		free(str);
+	ft_putstr_fd("\nUnexpected error from client\n", 1);
+	exit(EXIT_FAILURE);
+}
+
+int	mt_error_send(int pid, char *str)
+{
+	if (str)
+		free(str);
+	ft_putstr_fd("\nUnexpected error from server\n", 1);
+	kill(pid, SIGUSR2);
+	exit(EXIT_FAILURE);
+	return (-1);
+}
 
 int	mt_argument_error(void)
 {

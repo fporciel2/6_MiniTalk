@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 17:33:03 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/25 08:51:57 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/25 19:42:17 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -33,28 +33,94 @@
 
 #include "minitalk.h"
 
-static void	mt_sigusr2(int signum)
+static char	*mt_addfirstchar(char c, int pid)
 {
-	(void)signum;
-	write(1, "0", 1);
+	char	*add;
+
+	(void)pid;
+	add = malloc(2 * sizeof(*add));
+	if (!add)
+		return (mt_error_send(pid, NULL));
+	add[0] = c;
+	add[1] = 0;
+	return (add);
 }
 
-static void	mt_sigusr1(int signum)
+static char *mt_addcharacter(char *str, char c, int pid)
 {
-	(void)signum;
-	write(1, "1", 1);
+	char	*add;
+	int		count;
+
+	(void)pid;
+	if (!str)
+		return (mt_addfirstchar(c, pid));
+	add = malloc((ft_strlen(str) + 2) * sizeof (*add));
+	if (!add)
+		return (mt_error_send(pid, str));
+	count = -1;
+	while (str[++count])
+		add[count] = str[count];
+	free(str);
+	add[count++] = c;
+	add[count] = 0;
+	return (add);
+}
+
+static char *mt_print_string(char *message)
+{
+	ft_putstr_fd(message, 1);
+	write(1, "\n", 1);
+	free(message);
+	return (NULL);
+}
+
+static void	mt_handler_sigusr(int signum, siginfo_t *info, void *context)
+{
+	static char	character = 0xFF;
+	static int	bits = 0;
+	static int	pid = 0;
+	static char	*message;
+
+	(void)context;
+	if (info->si_pid)
+		pid = info->si_pid;
+	if (signum == SIGUSR1)
+		character ^= 0x80 >> bits;
+	else if (signum == SIGUSR2)
+		character |= 0x80 >> bits;
+	if (++bits == 8)
+	{
+		if (character)
+			message = mt_addcharacter(message, character, pid);
+		else
+			message = mt_print_string(message);
+		bits = 0;
+		character = 0xFF;
+	}
+	if (kill(pid, SIGUSR1) == -1)
+		mt_error_send(pid, message);
 }
 
 int	main(void)
 {
-	pid_t	pid;
+	struct sigaction	sa_signal;
+	sigset_t			block_mask;
 
-	pid = getpid();
-	ft_printf("\nPID: %d\n", pid);
-	if (signal(SIGUSR1, mt_sigusr1) == SIG_ERR)
+	if ((sigemptyset(&block_mask) == -1)
+		|| (sigaddset(&block_mask, SIGINT) == -1)
+		|| (sigaddset(&block_mask, SIGQUIT) == -1))
 		return (mt_error_exit());
-	if (signal(SIGUSR2, mt_sigusr2) == SIG_ERR)
+	sa_signal.sa_handler = 0;
+	sa_signal.sa_flags = SA_SIGINFO;
+	sa_signal.sa_mask = block_mask;
+	sa_signal.sa_sigaction = mt_handler_sigusr;
+	if ((sigaction(SIGUSR1, &sa_signal, NULL) == -1)
+		|| (sigaction(SIGUSR2, &sa_signal, NULL) == -1))
 		return (mt_error_exit());
+	ft_putstr_fd("\nPID: ", 1);
+	ft_putnbr_fd(getpid(), 1);
+	write(1, "\n", 1);
 	while (1)
 		pause();
+	return (0);
 }

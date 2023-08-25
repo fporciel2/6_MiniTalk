@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 17:39:21 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/25 16:37:46 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/25 20:25:43 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -33,36 +33,91 @@
 
 #include "minitalk.h"
 
-static int	mt_send_signals(char *message, int pid)
+static int	mt_str_isnumeric(char *str)
 {
-	int	shift;
-	int	check;
-
-	shift = -1;
-	while (*message)
+	while (*str)
 	{
-		while (++shift < 8)
-		{
-			if (*message & 0x80 >> shift)
-				check = kill(pid, SIGUSR2);
-			else
-				check = kill(pid, SIGUSR1);
-			if ((check == -1) || (usleep(3) == -1))
-				return (-1);
-		}
-		message++;
+		if (!ft_isdigit(*str))
+			return (0);
+		str++;
 	}
+	return (1);
+}
+
+static int	mt_send_escape(int pid, char *str)
+{
+	static int	count;
+	if (count++ != 8)
+	{
+		if (kill(pid, SIGUSR1) == -1)
+		{
+			mt_error_client(message);
+			return (0);
+		}
+	}
+	return (1);
+}
+
+static int	mt_send_bits(int pid, char *str)
+{
+	static char	*message;
+	static int	s_pid;
+	static int	bits = -1;
+
+	if (str)
+		message = ft_strdup(str);
+	if (!message)
+		return (mt_error_client(message));
+	if (pid)
+		s_pid = pid;
+	if (message[++bits / 8])
+	{
+		if (message[bits / 8] & (0x80 >> (bits % 8)))
+		{
+			if (kill(s_pid, SIGUSR2) == -1)
+				return (mt_error_client(message));
+		}
+		else if (kill(s_pid, SIGUSR1) == -1)
+			return (mt_error_client(message));
+		return (0);
+	}
+	if (!mt_send_escape(s_pid, message))
+		return (mt_error_client(message));
+	free(message);
 	return (0);
+}
+
+static void	handle_sigusr(int signum)
+{
+	int	end;
+
+	end = 0;
+	if (signum == SIGUSR1)
+		end = mt_send_bits(0, 0);
+	else if (signum == SIGUSR2)
+	{
+		ft_putstr_fd("All hope is gone...\n", 1);
+		exit(EXIT_FAILURE);
+	}
+	if (end)
+	{
+		ft_putstr_fd("All hope is here...\n", 1);
+		exit(EXIT_SUCCESS);
+	}
 }
 
 int	main(int argc, char **argv)
 {
 	int	pid;
 
-	if (argc != 2)
+	if ((argc != 2) || !mt_str_isnumeric(argv[1]))
 		return (mt_argument_error());
-	pid = ft_atoi(argv[1]);
-	if (mt_send_signals(argv[2], pid) == -1)
+	if ((signal(SIGUSR1, handle_sigusr) == -1)
+		|| (signal(SIGUSR2, handle_sigusr) == -1))
 		return (mt_error_exit());
+	if (mt_send_bits(ft_atoi(argv[1]), argv[2]) == -1)
+		return (mt_error_exit());
+	while (1)
+		pause();
 	return (0);
 }

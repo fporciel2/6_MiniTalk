@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 17:34:59 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/25 16:32:26 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/25 20:12:46 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -40,6 +40,8 @@
 # include "./printf/ft_printf.h"
 # include "./printf/libft/libft.h"
 
+int	mt_error_client(char *str);
+int	mt_error_send(int pid, char *str);
 int	mt_error_exit(void);
 int	mt_argument_error(void);
 
