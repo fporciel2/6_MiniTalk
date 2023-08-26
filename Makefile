@@ -6,7 +6,7 @@
 #    By: fporciel <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/22 19:16:39 by fporciel          #+#    #+#              #
-#    Updated: 2023/08/25 16:33:28 by fporciel         ###   ########.fr        #
+#    Updated: 2023/08/25 20:39:02 by fporciel         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # 
@@ -75,10 +75,10 @@ norm_check:
 		&& norminette
 
 leaks_check_server:
-	valgrind --leak-check=full --show-leak-kind=all --track-origins=yes -s \
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s \
 		-v ./server
 
 leaks_check_client:
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s \
-		-v ./client
+		-v ./client 244784 Cavallo
 

@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 17:39:21 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/25 20:25:43 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/26 08:22:44 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -47,11 +47,12 @@ static int	mt_str_isnumeric(char *str)
 static int	mt_send_escape(int pid, char *str)
 {
 	static int	count;
+
 	if (count++ != 8)
 	{
 		if (kill(pid, SIGUSR1) == -1)
 		{
-			mt_error_client(message);
+			mt_error_client(str);
 			return (0);
 		}
 	}
@@ -82,9 +83,9 @@ static int	mt_send_bits(int pid, char *str)
 		return (0);
 	}
 	if (!mt_send_escape(s_pid, message))
-		return (mt_error_client(message));
+		return (0);
 	free(message);
-	return (0);
+	return (1);
 }
 
 static void	handle_sigusr(int signum)
@@ -93,7 +94,7 @@ static void	handle_sigusr(int signum)
 
 	end = 0;
 	if (signum == SIGUSR1)
-		end = mt_send_bits(0, 0);
+		end = mt_send_bits(0, NULL);
 	else if (signum == SIGUSR2)
 	{
 		ft_putstr_fd("All hope is gone...\n", 1);
@@ -108,12 +109,10 @@ static void	handle_sigusr(int signum)
 
 int	main(int argc, char **argv)
 {
-	int	pid;
-
-	if ((argc != 2) || !mt_str_isnumeric(argv[1]))
+	if ((argc != 3) || !mt_str_isnumeric(argv[1]))
 		return (mt_argument_error());
-	if ((signal(SIGUSR1, handle_sigusr) == -1)
-		|| (signal(SIGUSR2, handle_sigusr) == -1))
+	if ((signal(SIGUSR1, handle_sigusr) == SIG_ERR)
+		|| (signal(SIGUSR2, handle_sigusr) == SIG_ERR))
 		return (mt_error_exit());
 	if (mt_send_bits(ft_atoi(argv[1]), argv[2]) == -1)
 		return (mt_error_exit());

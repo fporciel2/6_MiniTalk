@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 17:33:03 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/25 19:42:17 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/25 20:30:37 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -40,7 +40,10 @@ static char	*mt_addfirstchar(char c, int pid)
 	(void)pid;
 	add = malloc(2 * sizeof(*add));
 	if (!add)
-		return (mt_error_send(pid, NULL));
+	{
+		mt_error_send(pid, NULL);
+		return (NULL);
+	}
 	add[0] = c;
 	add[1] = 0;
 	return (add);
@@ -56,7 +59,10 @@ static char *mt_addcharacter(char *str, char c, int pid)
 		return (mt_addfirstchar(c, pid));
 	add = malloc((ft_strlen(str) + 2) * sizeof (*add));
 	if (!add)
-		return (mt_error_send(pid, str));
+	{
+		mt_error_send(pid, str);
+		return (NULL);
+	}
 	count = -1;
 	while (str[++count])
 		add[count] = str[count];
