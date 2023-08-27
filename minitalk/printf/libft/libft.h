@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/09 14:07:22 by fporciel          #+#    #+#             */
-/*   Updated: 2023/02/14 08:56:43 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/26 19:52:43 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -33,6 +33,7 @@
 
 #ifndef LIBFT_H
 # define LIBFT_H
+# include <stddef.h>
 # include <unistd.h>
 # include <stdlib.h>
 # include <stdint.h>

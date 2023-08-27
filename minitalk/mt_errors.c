@@ -6,7 +6,7 @@
 /*   By: fporciel <fporciel@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/26 15:04:38 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/26 15:16:19 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/26 16:37:52 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -38,12 +38,12 @@ int	mt_server_error(int param, int pid)
 	if (param == 0)
 	{
 		(void)pid;
-		ft_putstr_fd("Exit from server...", 1);
+		ft_putstr_fd("\nExit from server...\n", 1);
 		exit(EXIT_FAILURE);
 	}
 	else
 	{
-		ft_putstr_fd("Exit from server...", 1);
+		ft_putstr_fd("\nExit from server...\n", 1);
 		kill(pid, SIGUSR2);
 		exit(EXIT_FAILURE);
 		return (-1);
@@ -54,7 +54,7 @@ char	*mt_server_str_error(char *str, int pid)
 {
 	if (str)
 		free(str);
-	ft_putstr_fd("Exit from server...", 1);
+	ft_putstr_fd("\nExit from server...\n", 1);
 	kill(pid, SIGUSR2);
 	exit(EXIT_FAILURE);
 	return (NULL);
@@ -62,7 +62,7 @@ char	*mt_server_str_error(char *str, int pid)
 
 int	mt_client_error(void)
 {
-	ft_putstr_fd("Exit from client...", 1);
+	ft_putstr_fd("\nExit from client...\n", 1);
 	exit(EXIT_SUCCESS);
 	return (-1);
 }

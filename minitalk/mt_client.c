@@ -6,7 +6,7 @@
 /*   By: fporciel <fporciel@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/26 13:53:19 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/26 16:00:21 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/26 16:36:53 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -91,11 +91,12 @@ static int	mt_send_message(int pid, char *str)
 	return (0);
 }
 
-static void	mt_client_handler(int signum)
+static void	mt_client_handler(int signum, siginfo_t *info, void *context)
 {
+	(void)context;
 	if (signum == SIGUSR1)
 	{
-		if (mt_send_message(0, NULL) == -1)
+		if (mt_send_message(info->si_pid, NULL) == -1)
 			mt_client_error();
 	}
 	else
@@ -104,10 +105,17 @@ static void	mt_client_handler(int signum)
 
 int	main(int argc, char **argv)
 {
+	struct sigaction	sig_data;
+
 	if ((argc != 3) || !mt_isdigital(argv[1]))
 		return (mt_client_error());
-	if ((signal(SIGUSR1, mt_client_handler) == SIG_ERR)
-			|| (signal(SIGUSR2, mt_client_handler) == SIG_ERR))
+	sig_data.sa_handler = 0;
+	sig_data.sa_flags = SA_SIGINFO;
+	if (sigemptyset(&sig_data.sa_mask) == -1)
+		return (mt_client_error());
+	sig_data.sa_sigaction = mt_client_handler;
+	if ((sigaction(SIGUSR1, &sig_data, NULL) == -1)
+			|| (sigaction(SIGUSR2, &sig_data, NULL) == -1))
 		return (mt_client_error());
 	if (mt_send_message(ft_atoi(argv[1]), argv[2]) == -1)
 		return (mt_client_error());

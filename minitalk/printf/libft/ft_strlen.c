@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 11:29:25 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/26 13:47:24 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/27 08:10:00 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -35,13 +35,12 @@
 
 size_t	ft_strlen(const char *s)
 {
-	const char	*s1;
+	size_t	len;
 
-	s1 = s;
-	if (s)
-	{
-		while (*s1)
-			s1++;
-	}
-	return ((size_t)(s1 - s));
+	if (s == NULL)
+		return (0);
+	len = 0;
+	while (s[len])
+		len++;
+	return (len);
 }
