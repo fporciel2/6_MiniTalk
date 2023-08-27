@@ -6,7 +6,7 @@
 /*   By: fporciel <fporciel@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/26 09:23:25 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/26 18:38:29 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/27 16:02:09 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -106,21 +106,19 @@ static void	mt_server_handler(int signum, siginfo_t *info, void *context)
 int	main(void)
 {
 	struct sigaction	sig_data;
-	sigset_t			block_mask;
+	int					pid;
 
-	if ((sigemptyset(&block_mask) == -1)
-			|| (sigaddset(&block_mask, SIGINT) == -1)
-			|| (sigaddset(&block_mask, SIGQUIT) == -1))
-		return (mt_server_error(0, getpid()));
+	pid = getpid();
 	sig_data.sa_handler = 0;
 	sig_data.sa_flags = SA_SIGINFO;
-	sig_data.sa_mask = block_mask;
+	if (sigemptyset(&sig_data.sa_mask) == -1)
+		return (exit(EXIT_FAILURE));
 	sig_data.sa_sigaction = mt_server_handler;
 	if ((sigaction(SIGUSR1, &sig_data, NULL) == -1)
 			|| (sigaction(SIGUSR2, &sig_data, NULL) == -1))
-		return (mt_server_error(0, getpid()));
+		return (exit(EXIT_FAILURE));
 	ft_putstr_fd("\nSERVER PID: ", 1);
-	ft_putnbr_fd(getpid(), 1);
+	ft_putnbr_fd(pid, 1);
 	write(1, "\n", 1);
 	while (1)
 		pause();
