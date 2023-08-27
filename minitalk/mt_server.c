@@ -6,7 +6,7 @@
 /*   By: fporciel <fporciel@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/26 09:23:25 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/27 19:40:27 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/27 19:46:01 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -98,7 +98,7 @@ static void	mt_server_handler(int signum, siginfo_t *info, void *context)
 	static char	character = 0;
 	static char	*message = NULL;
 	static int	bitindex = 7;
-	static char	end_flag = 0;
+	static int	end_flag = 0;
 
 	(void)context;
 	if (signum == 1)
