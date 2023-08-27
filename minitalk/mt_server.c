@@ -6,7 +6,7 @@
 /*   By: fporciel <fporciel@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/26 09:23:25 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/27 16:02:09 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/27 18:49:44 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -33,15 +33,23 @@
 
 #include "minitalk.h"
 
-static int	mt_kill(int signum, int pid)
+static int	mt_kill(int signum, int pid, char **message)
 {
+	(void)message;
 	if (kill(pid, signum) == -1)
-		return (mt_server_error(1, pid));
-	return (0);
+	{
+		if (message != NULL)
+		{
+			free(*message);
+			*message = NULL;
+		}
+		return (exit(EXIT_FAILURE));
+	}
 }
 
-static void	mt_put_message(char **message)
+static void	mt_put_message(char **message, int *end_flag)
 {
+	*end_flag = 1;
 	ft_putstr_fd(*message, 1);
 	write(1, "\n", 1);
 	free(*message);
@@ -76,31 +84,30 @@ static char	*mt_addchar(char *message, char character, int client_pid)
 
 static void	mt_server_handler(int signum, siginfo_t *info, void *context)
 {
-	static char	*message;
-	static char	character;
+	static char	character = 0;
+	static char	*message = NULL;
 	static int	bitIndex = 7;
+	static char	end_flag = 0;
 
-	(void)context;
-	if (signum == SIGUSR2)
+	if (signum == 1)
 		character |= (1 << bitIndex);
 	bitIndex--;
 	if (bitIndex < 0)
 	{
-		message = mt_addchar(message, character, info->si_pid);
+		message = mt_addchar(message, character, 0);
 		bitIndex = 7;
 		if (character == 0)
-		{
-			mt_put_message(&message);
-			mt_kill(SIGUSR2, info->si_pid);
-		}
+			mt_putmessage(&message, &end_flag);
 		else
-		{
 			character = 0;
-			mt_kill(SIGUSR1, info->si_pid);
-		}
 	}
+	if (end_flag == 0)
+		mt_kill(SIGUSR1, info->si_pid, &message);
 	else
-		mt_kill(SIGUSR1, info->si_pid);
+	{
+		mt_kill(SIGUSR2, info->si_pid, NULL);
+		end_flag = 0;
+	}
 }
 
 int	main(void)
