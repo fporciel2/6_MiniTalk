@@ -6,7 +6,7 @@
 /*   By: fporciel <fporciel@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/27 16:05:38 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/27 18:23:34 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/28 12:15:59 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* This file is meant to test the logic of the server's handler function. It
@@ -23,6 +23,15 @@
 #include <stdint.h>
 #include <stdio.h>
 
+static void	ft_bzero(void *s, size_t n)
+{
+	while (n > 0)
+	{
+		*((unsigned char *)s + (n - 1)) = 0;
+		n--;
+	}
+}
+
 static size_t	ft_strlen(const char *s)
 {
 	size_t	len;
@@ -34,6 +43,47 @@ static size_t	ft_strlen(const char *s)
 		len++;
 	return (len);
 }
+/*
+static void	ft_writenbr(char c, int fd)
+{
+	write(fd, &c, 1);
+}
+
+static void	ft_putnbr_fd(int n, int fd)
+{
+	long int	i;
+
+	i = n;
+	if (i < 0)
+	{
+		i = -i;
+		write(fd, "-", 1);
+	}
+	if (i > 9)
+	{
+		ft_putnbr_fd((i / 10), fd);
+		ft_writenbr(((i % 10) + 48), fd);
+	}
+	else
+		ft_writenbr((i + 48), fd);
+}
+
+static void	ft_putstr_fd(char *s, int fd)
+{
+	size_t	strlen;
+
+	if (s == NULL)
+		return ;
+	strlen = ft_strlen(s);
+	write(fd, s, strlen);
+}
+
+static int	mt_kill(int signum, int pid)
+{
+	if (kill(pid, signum) == -1)
+		return (exit(EXIT_FAILURE), 0);
+	return (0);
+}*/
 
 static char	*ft_strdup(const char *s)
 {
@@ -55,62 +105,72 @@ static char	*ft_strdup(const char *s)
 	return (str);
 }
 
-static char	*mt_addchar(char *message, char character, int client_pid)
+static void	mt_addc(char *message, char *message_swap, int *counter, char c)
 {
-	char	*new_message;
-	int		messagelen;
-	int		count;
-
-	(void)client_pid;
-	messagelen = (int)ft_strlen(message);
-	count = 0;
-	new_message = malloc((2 + messagelen) * sizeof(*new_message));
-	if (new_message == NULL)
-		return (free(message), NULL);
-	if (message)
+	if (*counter == 20000)
 	{
-		while (count < messagelen)
-		{
-			new_message[count] = message[count];
-			count++;
-		}
-		free(message);
+		if (message[0] != 0)
+			write(1, message, ft_strlen(message));
+		else
+			write(1, message_swap, ft_strlen(message_swap));
+		*counter = 0;
 	}
-	new_message[count] = character;
-	new_message[count + 1] = 0;
-	return (new_message);
+	if (message[*counter] == 0)
+	{
+		message[*counter] = c;
+		message_swap[*counter] = 0;
+	}
+	else
+	{
+		message_swap[*counter] = c;
+		message[*counter] = 0;
+	}
+}
+
+static void mt_set_message(char character, int *end_flag)
+{
+	static char	message[20001];
+	static char	message_swap[20001];
+	static int	counter = 0;
+
+	if (character == 0)
+	{
+		if (message[0] != 0)
+			write(1, message, ft_strlen(message));
+		else
+			write(1, message_swap, ft_strlen(message_swap));
+		ft_bzero(message, ft_strlen(message));
+		ft_bzero(message_swap, ft_strlen(message_swap));
+		(*end_flag)++;
+		counter = 0;
+	}
+	else
+	{
+		mt_addc(message, message_swap, &counter, character);
+		counter++;
+	}
 }
 
 static void	mt_server_handler(int signum, int *checker)
 {
 	static char	character = 0;
-	static char	*message = NULL;
-	static int	bitIndex = 7;
+	static int	bitindex = 7;
+	static int	end_flag = 0;
 
 	if (signum == 1)
-		character |= (1 << bitIndex);
-	bitIndex--;
-	if (bitIndex < 0)
+		character |= (1 << bitindex);
+	bitindex--;
+	if (bitindex < 0)
 	{
-		message = mt_addchar(message, character, 0);
-		if (message == NULL) // remove this check late
-		{
-			(*checker)++;
-			return ;
-		}
-		bitIndex = 7;
-		if (character == 0)
-		{
-			(*checker)++;
-			printf("\n%s\n", message);
-			free(message);
-			message = NULL;
-		}
-		else
-			character = 0;
+		bitindex = 7;
+		mt_set_message(character, &end_flag);
+		character = 0;
 	}
-	// Add a sending instruction here... Maybe a flag to pass to
-	// 'mt_putmessage'. 
+	if (end_flag != 0)
+	{
+		(*checker)++;
+		end_flag = 0;
+	}
 }
 
 int	main(void)
