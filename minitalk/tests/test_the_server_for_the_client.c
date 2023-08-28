@@ -6,7 +6,7 @@
 /*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/28 11:56:18 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/28 12:02:45 by fporciel         ###   ########.fr       */
+/*   Updated: 2023/08/28 14:07:35 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,7 @@ static void mt_set_message(char character, int *end_flag)
 			write(1, message, ft_strlen(message));
 		else
 			write(1, message_swap, ft_strlen(message_swap));
+		write(1, "\n\n", 1);
 		ft_bzero(message, ft_strlen(message));
 		ft_bzero(message_swap, ft_strlen(message_swap));
 		(*end_flag)++;
@@ -135,7 +136,7 @@ static void	mt_server_handler(int signum, siginfo_t *info, void *context)
 	static int	end_flag = 0;
 
 	(void)context;
-	if (signum == 1)
+	if (signum == SIGUSR2)
 		character |= (1 << bitindex);
 	bitindex--;
 	if (bitindex < 0)
