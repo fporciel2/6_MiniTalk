@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   mt_client.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: fporciel <fporciel@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/08/23 17:39:21 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/26 08:22:44 by fporciel         ###   ########.fr       */
+/*   Created: 2023/08/26 13:53:19 by fporciel          #+#    #+#             */
+/*   Updated: 2023/08/28 14:17:17 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -33,89 +33,82 @@
 
 #include "minitalk.h"
 
-static int	mt_str_isnumeric(char *str)
+static const char	*g_message;
+
+static int	mt_kill(int signum, int pid)
 {
-	while (*str)
-	{
-		if (!ft_isdigit(*str))
-			return (0);
-		str++;
-	}
-	return (1);
+	if (kill(pid, signum) == -1)
+		return (exit(EXIT_FAILURE), 0);
+	return (0);
 }
 
-static int	mt_send_escape(int pid, char *str)
+static int	mt_isdigital(char *str)
 {
-	static int	count;
-
-	if (count++ != 8)
-	{
-		if (kill(pid, SIGUSR1) == -1)
-		{
-			mt_error_client(str);
-			return (0);
-		}
-	}
-	return (1);
-}
-
-static int	mt_send_bits(int pid, char *str)
-{
-	static char	*message;
-	static int	s_pid;
-	static int	bits = -1;
-
 	if (str)
-		message = ft_strdup(str);
-	if (!message)
-		return (mt_error_client(message));
-	if (pid)
-		s_pid = pid;
-	if (message[++bits / 8])
 	{
-		if (message[bits / 8] & (0x80 >> (bits % 8)))
+		while (*str)
 		{
-			if (kill(s_pid, SIGUSR2) == -1)
-				return (mt_error_client(message));
+			if (!ft_isdigit(*str))
+				return (0);
+			str++;
 		}
-		else if (kill(s_pid, SIGUSR1) == -1)
-			return (mt_error_client(message));
-		return (0);
+		return (1);
 	}
-	if (!mt_send_escape(s_pid, message))
-		return (0);
-	free(message);
-	return (1);
+	return (0);
 }
 
-static void	handle_sigusr(int signum)
+static void	mt_client_handler(int signum, siginfo_t *info, void *context)
 {
-	int	end;
+	static int	bitindex = 6;
+	static int	counter = 0;
 
-	end = 0;
+	(void)context;
 	if (signum == SIGUSR1)
-		end = mt_send_bits(0, NULL);
-	else if (signum == SIGUSR2)
 	{
-		ft_putstr_fd("All hope is gone...\n", 1);
-		exit(EXIT_FAILURE);
+		if (bitindex < 0)
+		{
+			counter++;
+			bitindex = 7;
+		}
+		if ((g_message[counter] >> bitindex) & 1)
+		{
+			bitindex--;
+			mt_kill(SIGUSR2, info->si_pid);
+		}
+		else
+		{
+			bitindex--;
+			mt_kill(SIGUSR1, info->si_pid);
+		}
 	}
-	if (end)
-	{
-		ft_putstr_fd("All hope is here...\n", 1);
+	else
 		exit(EXIT_SUCCESS);
-	}
+}
+
+static void	mt_send_first_bit(int pid)
+{
+	if ((g_message[0] >> 7) & 1)
+		mt_kill(SIGUSR2, pid);
+	else
+		mt_kill(SIGUSR1, pid);
 }
 
 int	main(int argc, char **argv)
 {
-	if ((argc != 3) || !mt_str_isnumeric(argv[1]))
-		return (mt_argument_error());
-	if ((signal(SIGUSR1, handle_sigusr) == SIG_ERR)
-		|| (signal(SIGUSR2, handle_sigusr) == SIG_ERR))
-		return (mt_error_exit());
-	if (mt_send_bits(ft_atoi(argv[1]), argv[2]) == -1)
-		return (mt_error_exit());
+	struct sigaction	sig_data;
+
+	if ((argc != 3) || !mt_isdigital(argv[1]))
+		return (exit(EXIT_FAILURE), 0);
+	g_message = argv[2];
+	sig_data.sa_handler = 0;
+	sig_data.sa_flags = SA_SIGINFO;
+	if (sigemptyset(&sig_data.sa_mask) == -1)
+		return (exit(EXIT_FAILURE), 0);
+	sig_data.sa_sigaction = mt_client_handler;
+	if ((sigaction(SIGUSR1, &sig_data, NULL) == -1)
+		|| (sigaction(SIGUSR2, &sig_data, NULL) == -1))
+		return (exit(EXIT_FAILURE), 0);
+	mt_send_first_bit(ft_atoi(argv[1]));
 	while (1)
 		pause();
 	return (0);

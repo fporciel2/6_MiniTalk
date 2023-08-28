@@ -6,7 +6,7 @@
 #    By: fporciel <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/22 19:16:39 by fporciel          #+#    #+#              #
-#    Updated: 2023/08/25 20:39:02 by fporciel         ###   ########.fr        #
+#    Updated: 2023/08/28 14:39:30 by fporciel         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # 
@@ -34,45 +34,41 @@
 .DEFAULT_GOAL := $(NAME)
 NAME := client
 MT_SERVER := server
-MT_ERRORS := mt_errors.o
 CLIENT_SOURCE := mt_client.c
 SERVER_SOURCE := mt_server.c
-ERRORS_SOURCE := mt_errors.c
 THISDIR := $(shell pwd)
-PRINTF_DIR := $(THISDIR)/printf
-PRINTF_LIB := $(PRINTF_DIR)/libftprintf.a
+FT_DIR := $(THISDIR)/libft
+FT_LIB := $(FT_DIR)/libft.a
 CC := gcc
 CFLAGS := -Wall -Wextra -Werror -g
 
 $(NAME): $(MT_SERVER)
-	$(CC) $(CFLAGS) mt_client.c mt_errors.c -o client -I$(THISDIR) \
-		-I$(PRINTF_DIR) -I$(PRINTF_DIR)/libft -I/usr/include \
-		-L$(PRINTF_DIR) -L$(PRINTF_DIR)/libft -lftprintf -lft
+	$(CC) $(CFLAGS) mt_client.c -o client -I$(THISDIR) \
+		-I$(FT_DIR) -I/usr/include -L$(FT_DIR) -lft
+	make clean
 
 all: $(NAME)
 
-$(MT_SERVER): $(PRINTF_LIB)
-	$(CC) $(CFLAGS) mt_server.c mt_errors.c -o server -I$(THISDIR) \
-		-I$(PRINTF_DIR) -I$(PRINTF_DIR)/libft -I/usr/include \
-		-L$(PRINTF_DIR) -L$(PRINTF_DIR)/libft -lftprintf -lft
+$(MT_SERVER): $(FT_LIB)
+	$(CC) $(CFLAGS) mt_server.c -o server -I$(THISDIR) \
+		-I$(FT_DIR) -I/usr/include -L$(FT_DIR) -lft
 
-$(PRINTF_LIB):
-	cd printf && make && cd ..
+$(FT_LIB):
+	cd libft && make && cd ..
 
 clean:
-	rm -f *.o
-	cd $(PRINTF_DIR)/libft && make clean && cd .. && make clean && cd ..
+	rm -f *.o && rm -f *.h.gch
+	cd $(FT_DIR) && rm -f *.o && rm -f *.h.gch && cd ..
 
 fclean: clean
 	rm -f client
 	rm -f server
-	cd $(PRINTF_DIR)/libft && make clean && cd .. && make clean && cd ..
+	cd $(FT_DIR) && rm -f $(FT_LIB) && cd ..
 
 re: clean fclean all
 
 norm_check:
-	cd $(PRINTF_DIR)/libft && norminette && cd .. && norminette && cd .. \
-		&& norminette
+	cd $(FT_DIR) && norminette && cd .. && norminette
 
 leaks_check_server:
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s \
@@ -80,5 +76,5 @@ leaks_check_server:
 
 leaks_check_client:
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s \
-		-v ./client 244784 Cavallo
+		-v ./client 230070 Cavallo
 

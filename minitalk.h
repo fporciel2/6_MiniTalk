@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minitalk.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fporciel <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: fporciel <fporciel@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/08/23 17:34:59 by fporciel          #+#    #+#             */
-/*   Updated: 2023/08/25 20:12:46 by fporciel         ###   ########.fr       */
+/*   Created: 2023/08/26 15:00:00 by fporciel          #+#    #+#             */
+/*   Updated: 2023/08/28 14:22:26 by fporciel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 /* 
@@ -34,15 +34,7 @@
 #ifndef MINITALK_H
 # define MINITALK_H
 # include <signal.h>
-# include <stdlib.h>
-# include <unistd.h>
 # include <sys/types.h>
-# include "./printf/ft_printf.h"
-# include "./printf/libft/libft.h"
-
-int	mt_error_client(char *str);
-int	mt_error_send(int pid, char *str);
-int	mt_error_exit(void);
-int	mt_argument_error(void);
+# include "./libft/libft.h"
 
 #endif
